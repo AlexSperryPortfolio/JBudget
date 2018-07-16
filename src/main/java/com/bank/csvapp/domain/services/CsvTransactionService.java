@@ -4,14 +4,14 @@ import com.bank.csvapp.domain.CsvTransaction;
 
 public interface CsvTransactionService {
 	
-	Iterable<CsvTransaction> listAllTransactions();
+	Iterable<CsvTransaction> listAllCsvTransactions();
 
-    CsvTransaction getTransactionById(Integer id);
+    CsvTransaction getCsvTransactionById(Integer id);
 
-    CsvTransaction saveTransaction(CsvTransaction transaction);
+    CsvTransaction saveCsvTransaction(CsvTransaction csvTransaction);
 
-    Iterable<CsvTransaction> saveTransactionList(Iterable<CsvTransaction> transactionIterable);
+    Iterable<CsvTransaction> saveCsvTransactionList(Iterable<CsvTransaction> csvTransactionIterable);
 
-    void deleteTransaction(Integer id);
+    void deleteCsvTransaction(Integer id);
 
 }

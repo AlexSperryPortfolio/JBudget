@@ -11,31 +11,31 @@ import com.bank.csvapp.domain.services.CsvTransactionService;
 public class CsvTransactionServiceImpl implements CsvTransactionService{
 	
 	@Autowired
-	private CsvTransactionRepository transactionRepository;
+	private CsvTransactionRepository csvTransactionRepository;
 
 	@Override
-	public Iterable<CsvTransaction> listAllTransactions() {
-		return transactionRepository.findAll();
+	public Iterable<CsvTransaction> listAllCsvTransactions() {
+		return csvTransactionRepository.findAll();
 	}
 
 	@Override
-	public CsvTransaction getTransactionById(Integer id) {
-		return transactionRepository.findOne(id);
+	public CsvTransaction getCsvTransactionById(Integer id) {
+		return csvTransactionRepository.findOne(id);
 	}
 
 	@Override
-	public CsvTransaction saveTransaction(CsvTransaction transaction) {
-		return transactionRepository.save(transaction);
+	public CsvTransaction saveCsvTransaction(CsvTransaction csvTransaction) {
+		return csvTransactionRepository.save(csvTransaction);
 	}
 
 	@Override
-	public Iterable<CsvTransaction> saveTransactionList(Iterable<CsvTransaction> transactionIterable) {
-		return transactionRepository.save(transactionIterable);
+	public Iterable<CsvTransaction> saveCsvTransactionList(Iterable<CsvTransaction> csvTransactionIterable) {
+		return csvTransactionRepository.save(csvTransactionIterable);
 	}
 
 	@Override
-	public void deleteTransaction(Integer id) {
-		transactionRepository.delete(id);
+	public void deleteCsvTransaction(Integer id) {
+		csvTransactionRepository.delete(id);
 	}
 
 }
