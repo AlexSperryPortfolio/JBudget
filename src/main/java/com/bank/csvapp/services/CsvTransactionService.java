@@ -1,16 +1,18 @@
-package com.bank.csvapp.domain.services;
+package com.bank.csvapp.services;
 
 import com.bank.csvapp.domain.CsvTransaction;
 
+import java.util.List;
+
 public interface CsvTransactionService {
 	
-	Iterable<CsvTransaction> listAllCsvTransactions();
+	List<CsvTransaction> listAllCsvTransactions();
 
     CsvTransaction getCsvTransactionById(Integer id);
 
     CsvTransaction saveCsvTransaction(CsvTransaction csvTransaction);
 
-    Iterable<CsvTransaction> saveCsvTransactionList(Iterable<CsvTransaction> csvTransactionIterable);
+    List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionIterable);
 
     void deleteCsvTransaction(Integer id);
 

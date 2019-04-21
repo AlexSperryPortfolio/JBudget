@@ -1,13 +1,12 @@
 package com.bank.csvapp;
 
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-public class App 
+@ComponentScan(basePackages = "com.bank.csvapp")
+public class JBudget
 {
 	
 	/*@Value("${spring.datasource.url}")
@@ -35,6 +34,6 @@ public class App
     }*/
 
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(JBudget.class, args);
     }
 }

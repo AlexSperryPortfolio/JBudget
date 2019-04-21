@@ -1,8 +1,5 @@
 package com.bank.csvapp.bootstrap;
 
-import com.bank.csvapp.common.FileDto;
-import com.bank.csvapp.domain.services.CsvTransactionService;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

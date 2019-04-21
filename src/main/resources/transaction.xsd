@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="transaction">
+	  <xs:complexType>
+		<xs:sequence>
+		  <xs:element name="accountNumber" type="xs:string"/>
+		  <xs:element name="postDate" type="xs:date"/>
+		  <xs:element name="checkColumn" type="xs:string" minOccurs="0"/>
+		  <xs:element name="description" type="xs:string"/>
+		  <xs:element name="debit" minOccurs="0">
+			<xs:simpleType>
+				<xs:restriction base="xs:decimal">
+				  <xs:fractionDigits value="2"/>
+				</xs:restriction>
+			</xs:simpleType>
+		  </xs:element>
+		  <xs:element name="credit" minOccurs="0">
+			<xs:simpleType>
+				<xs:restriction base="xs:decimal">
+				  <xs:fractionDigits value="2"/>
+				</xs:restriction>
+			</xs:simpleType>
+		  </xs:element>
+		  <xs:element name="status" type="xs:string"/>
+		  <xs:element name="balance">
+			<xs:simpleType>
+				<xs:restriction base="xs:decimal">
+				  <xs:fractionDigits value="2"/>
+				</xs:restriction>
+			</xs:simpleType>
+		  </xs:element>
+		</xs:sequence>
+	  </xs:complexType>
+	</xs:element>
+
+</xs:schema> 

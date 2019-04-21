@@ -9,8 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableAutoConfiguration
 @EntityScan(basePackages = {"com.bank.csvapp.domain"}) //<--Tell DAO accessing functions to look for entities in mvc.models package
-@EnableJpaRepositories(basePackages = {"com.bank.csvapp.domain.repositories"}) //<--Tell DAO accessing functions to look for repositories in mvc.repositories package
+@EnableJpaRepositories(basePackages = {"com.bank.csvapp.repositories"}) //<--Tell DAO accessing functions to look for repositories in mvc.repositories package
 @EnableTransactionManagement
 public class RepositoryConfiguration {
-
 }
