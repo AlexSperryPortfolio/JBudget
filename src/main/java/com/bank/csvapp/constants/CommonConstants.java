@@ -6,8 +6,15 @@ public class CommonConstants {
     public static final int INDEX_OF_LAST_ACCOUNT_NUM_QUOTE = 13;
 
     //tag constants
+    public static final String ESSENTIALS = "Essentials";
+    public static final String SECURITY = "Security";
+    public static final String GOALS = "Goals";
+    public static final String LIFESTYLE = "Lifestyle";
+    public static final String DISCRETIONARY = "Discretionary";
+
     public static final String STUDENT_LOANS = "Student Loans";
     public static final String BILLS = "Bills";
+    public static final String DEBT = "Debt";
     public static final String ENTERTAINMENT = "Entertainment";
     public static final String PAYCHECK = "Paycheck";
     public static final String FAST_FOOD = "Fast Food";

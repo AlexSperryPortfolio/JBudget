@@ -1,27 +1,28 @@
 package com.bank.csvapp.utility;
 
 import com.bank.csvapp.domain.CsvTransaction;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class FileDto {
 
     private static final Logger log = Logger.getLogger(FileDto.class);
 
+    //todo: make these env vars
     private static final String ACCOUNT_HISTORY_CSV_PATH = "C:\\Users\\Admin\\Desktop\\Personal files\\CsvFiles\\AccountHistory.csv";
     private static final String TRANSACTION_XSD_PATH = "C:\\Users\\Admin\\git\\com.bank.csvapp\\src\\main\\resources\\transaction.xsd";
 
@@ -32,34 +33,34 @@ public class FileDto {
     }
 
     public List<CsvTransaction> csvFileImport() {
-        String line;
         List<CsvTransaction> transactionList = new ArrayList<>();
+        List<CSVRecord> csvRecordList = new ArrayList<>();//initialize as empty
 
-        FileInputHandler fileInputHandler = new FileInputHandler(csvTransactionTagManager);
-
-        try (Scanner sc = new Scanner(new BufferedReader(new FileReader(ACCOUNT_HISTORY_CSV_PATH)))) {
-
-            csvTransactionTagManager.seedBaseTags();
-
-            while (sc.hasNext()) {
-                line = sc.nextLine();
-                if (line != null && !line.isEmpty() && !line.equals("Account Number,Post Date,Check,Description,Debit,Credit,Status,Balance")) {
-
-                    String[] cleanCsvLineArray = fileInputHandler.translateLineToArray(line);
-
-                    //validate transaction against xsd
-                    Document doc = XmlUtils.getTransactionXmlDoc(cleanCsvLineArray);
-                    InputStream docInputStream = XmlUtils.docToInputStream(doc);
-                    InputStream xsdInputStream = new FileInputStream(new File(TRANSACTION_XSD_PATH));
-                    XmlUtils.validate(docInputStream, xsdInputStream);
-
-                    CsvTransaction csvTransaction = fileInputHandler.cleanLineArrayToCsvTransaction(cleanCsvLineArray);
-                    transactionList.add(csvTransaction);
-                }
-            }
-        } catch (final IOException | ParseException | ParserConfigurationException | TransformerException | SAXException ex) {
-            log.error(ex);
+        try (BufferedReader br = new BufferedReader(new FileReader(ACCOUNT_HISTORY_CSV_PATH))) {
+            CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(br);
+            csvRecordList = csvParser.getRecords();
+        } catch (IOException ioEx) {
+            log.error(ioEx);
         }
+
+        csvTransactionTagManager.seedBaseTags();
+
+        for (CSVRecord csvRecord : csvRecordList) {
+            try {
+                //validate transaction against xsd
+                Document doc = XmlUtils.getTransactionXmlDoc(csvRecord);
+                XmlUtils.validate(new DOMSource(doc), TRANSACTION_XSD_PATH);
+
+                //if valid (no exceptions thrown) create CsvTransaction and add to list
+                CsvTransaction csvTransaction = new CsvTransaction(csvRecord);
+                csvTransaction.setTagList(csvTransactionTagManager.addDefaultTags(csvTransaction.getDescription()));
+                transactionList.add(csvTransaction);
+
+            } catch (final IOException | ParseException | ParserConfigurationException | TransformerException | SAXException ex) {
+                log.error(ex);
+            }
+        }
+
         return transactionList;
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
 
 @Controller
@@ -37,6 +39,10 @@ public class IndexController {
 
         FileDto fileDto = new FileDto(csvTransactionTagManager);
         List<CsvTransaction> transactionList = fileDto.csvFileImport();
+
+//        DecimalFormat df = new DecimalFormat("#.##");
+//        df.setRoundingMode(RoundingMode.HALF_EVEN);
+//        System.out.println(df.format(transactionList.get(0).getBalance()));
 
         csvTransactionService.saveCsvTransactionList(transactionList);
 

@@ -1,5 +1,8 @@
 package com.bank.csvapp.domain;
 
+import org.apache.commons.csv.CSVRecord;
+import org.springframework.util.StringUtils;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,11 +12,25 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Version;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 public class CsvTransaction {
+
+    public static final SimpleDateFormat STANDARD_TRANSACTION_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
+
+    public static final String ACCOUNT_NUMBER_STRING = "Account Number";
+    public static final String POST_DATE_STRING = "Post Date";
+    public static final String CHECK_COLUMN_STRING = "Check";
+    public static final String DESCRIPTION_STRING = "Description";
+    public static final String DEBIT_STRING = "Debit";
+    public static final String CREDIT_STRING = "Credit";
+    public static final String STATUS_STRING = "Status";
+    public static final String BALANCE_STRING = "Balance";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,26 +45,27 @@ public class CsvTransaction {
     private Date postDate;
     private String checkColumn;
     private String description;
-    private Float debit;
-    private Float credit;
+    private BigDecimal debit;
+    private BigDecimal credit;
     private String status;
-    private Float balance;
-//	private CsvTransactionTag csvTransactionType;
+    private BigDecimal balance;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CsvTransactionTag> typeList;
+    private List<CsvTransactionTag> tagList;
 
-    public CsvTransaction(String accountNumber, Date postDate, String checkColumn, String description,
-                          Float debit, Float credit, String status, Float balance, List<CsvTransactionTag> types) {
-        this.accountNumber = accountNumber;
-        this.postDate = postDate;
-        this.checkColumn = checkColumn;
-        this.description = description;
-        this.debit = debit;
-        this.credit = credit;
-        this.status = status;
-        this.balance = balance;
-        this.typeList = types;
+    public CsvTransaction(CSVRecord csvRecord) throws ParseException {
+        this.accountNumber = csvRecord.get(ACCOUNT_NUMBER_STRING);
+        postDate = STANDARD_TRANSACTION_DATE_FORMAT.parse(csvRecord.get(POST_DATE_STRING));
+        this.postDate = new java.sql.Date(postDate.getTime());
+        this.checkColumn = csvRecord.get(CHECK_COLUMN_STRING);
+        this.description = csvRecord.get(DESCRIPTION_STRING);
+        String debitString = csvRecord.get(DEBIT_STRING);
+        this.debit = StringUtils.isEmpty(debitString) ? BigDecimal.ZERO : new BigDecimal(debitString);
+        String creditString = csvRecord.get(CREDIT_STRING);
+        this.credit = (StringUtils.isEmpty(creditString) ? BigDecimal.ZERO : new BigDecimal(creditString));
+        this.status = csvRecord.get(STATUS_STRING);
+        String balanceString = csvRecord.get(BALANCE_STRING);
+        this.balance = (StringUtils.isEmpty(balanceString) ? BigDecimal.ZERO : new BigDecimal(balanceString));
     }
 
     public CsvTransaction() {
@@ -85,19 +103,19 @@ public class CsvTransaction {
         this.description = description;
     }
 
-    public Float getCredit() {
+    public BigDecimal getCredit() {
         return this.credit;
     }
 
-    public void setCredit(Float credit) {
+    public void setCredit(BigDecimal credit) {
         this.credit = credit;
     }
 
-    public Float getDebit() {
+    public BigDecimal getDebit() {
         return this.debit;
     }
 
-    public void setDebit(Float debit) {
+    public void setDebit(BigDecimal debit) {
         this.debit = debit;
     }
 
@@ -109,27 +127,19 @@ public class CsvTransaction {
         this.status = status;
     }
 
-    public Float getBalance() {
+    public BigDecimal getBalance() {
         return this.balance;
     }
 
-    public void setBalance(Float balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
-    public List<CsvTransactionTag> getTypeList() {
-        return this.typeList;
+    public List<CsvTransactionTag> getTagList() {
+        return this.tagList;
     }
 
-    public void setTypeList(List<CsvTransactionTag> typeList) {
-        this.typeList = typeList;
+    public void setTagList(List<CsvTransactionTag> typeList) {
+        this.tagList = typeList;
     }
-
-//	public CsvTransactionTag getCsvTransactionType() {
-//		return csvTransactionType;
-//	}
-//
-//	public void setCsvTransactionType(CsvTransactionTag csvTransactionType) {
-//		this.csvTransactionType = csvTransactionType;
-//	}
 }

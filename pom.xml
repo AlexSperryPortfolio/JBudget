@@ -25,9 +25,14 @@
       		<artifactId>junit</artifactId>
       		<scope>test</scope>
     	</dependency>
-    		<!--  ==============================================  -->
-        	<!--  LOMBOK                                          -->
-        	<!--  ==============================================  -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.6</version>
+		</dependency>
+		<!--  ==============================================  -->
+		<!--  LOMBOK                                          -->
+		<!--  ==============================================  -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

@@ -22,7 +22,16 @@ public class CsvTransactionTagManager {
     public void seedBaseTags() {
         List<CsvTransactionTag> tagList = new ArrayList<>();
 
+        tagList.add(new CsvTransactionTag(CommonConstants.ESSENTIALS));
+        tagList.add(new CsvTransactionTag(CommonConstants.SECURITY));
+        tagList.add(new CsvTransactionTag(CommonConstants.GOALS));
+        tagList.add(new CsvTransactionTag(CommonConstants.LIFESTYLE));
+        tagList.add(new CsvTransactionTag(CommonConstants.DISCRETIONARY));
+
         tagList.add(new CsvTransactionTag(CommonConstants.BILLS));
+        tagList.add(new CsvTransactionTag(CommonConstants.DEBT));
+
+        tagList.add(new CsvTransactionTag("ATM Surcharge", "ATM SURCHARGE"));
 
         //student loans
         tagList.add(new CsvTransactionTag(CommonConstants.STUDENT_LOANS));
@@ -76,7 +85,7 @@ public class CsvTransactionTagManager {
         this.warmUpCsvTransactionTagCache(csvTransactionTagService.saveCsvTransactionTagList(tagList));
     }
 
-    public List<CsvTransactionTag> addDefaultTypes(String descriptionContent) {
+    public List<CsvTransactionTag> addDefaultTags(String descriptionContent) {
         String descUpper = descriptionContent.toUpperCase();
         List<CsvTransactionTag> typeList = new ArrayList<>();
 
@@ -91,7 +100,8 @@ public class CsvTransactionTagManager {
         //Fast Food
         for (String entry : fastFoodArray) {
             if (descUpper.contains(entry)) {
-                typeList.add(csvTransactionTagCache.get("Fast Food"));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.FAST_FOOD));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
             }
         }
 
@@ -103,7 +113,8 @@ public class CsvTransactionTagManager {
         for (String entry : studentLoanArray) {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
-                typeList.add(csvTransactionTagCache.get(CommonConstants.BILLS));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.DEBT));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.SECURITY));
             }
         }
 
@@ -114,6 +125,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.BILLS));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
             }
         }
 
@@ -124,6 +136,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.CAR_REPAIR));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
             }
         }
 
@@ -134,6 +147,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.CAR_REGISTRATION));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
             }
         }
 
@@ -144,6 +158,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.GAS_STATION));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
             }
         }
 
@@ -153,6 +168,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.GROCERIES));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
             }
         }
 
@@ -160,22 +176,26 @@ public class CsvTransactionTagManager {
         if (descUpper.contains("TARGET")) {
             typeList.add(csvTransactionTagCache.get("Target"));
             typeList.add(csvTransactionTagCache.get(CommonConstants.BIG_BOX));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.LIFESTYLE));
         }
 
         //Wal-Mart
         if (descUpper.contains("WAL-MART")) {
             typeList.add(csvTransactionTagCache.get("Wal-Mart"));
             typeList.add(csvTransactionTagCache.get(CommonConstants.BIG_BOX));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.LIFESTYLE));
         }
 
         //Software
         if (descUpper.contains("LAST PASS")) {
             typeList.add(csvTransactionTagCache.get("Software"));
             typeList.add(csvTransactionTagCache.get("Last Pass"));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
         }
 
         if (descUpper.contains("ATM SURCHARGE")) {
-            typeList.add(csvTransactionTagCache.get("Atm Surcharge"));
+            typeList.add(csvTransactionTagCache.get("ATM Surcharge"));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
         }
 
         //Entertainment
@@ -186,6 +206,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get("Alcohol"));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
             }
         }
 
@@ -196,6 +217,7 @@ public class CsvTransactionTagManager {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.ENTERTAINMENT));
                 typeList.add(csvTransactionTagCache.get("Streaming Video"));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
             }
         }
 
@@ -205,6 +227,7 @@ public class CsvTransactionTagManager {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(CommonConstants.ENTERTAINMENT));
                 typeList.add(csvTransactionTagCache.get("Steam"));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
             }
         }
 
@@ -212,12 +235,14 @@ public class CsvTransactionTagManager {
         if (descUpper.contains("MICROSOFT *XBO")) {
             typeList.add(csvTransactionTagCache.get(CommonConstants.ENTERTAINMENT));
             typeList.add(csvTransactionTagCache.get("Xbox"));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
         }
 
         //Amazon
         if (descUpper.contains("AMAZON")) {
             typeList.add(csvTransactionTagCache.get(CommonConstants.ENTERTAINMENT));
             typeList.add(csvTransactionTagCache.get("Amazon"));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.DISCRETIONARY));
         }
 
         //Credits
