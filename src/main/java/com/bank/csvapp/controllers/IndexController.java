@@ -1,73 +1,107 @@
 package com.bank.csvapp.controllers;
 
+import com.bank.csvapp.constants.CommonConstants;
 import com.bank.csvapp.domain.CsvTransaction;
+import com.bank.csvapp.domain.CsvTransactionTag;
 import com.bank.csvapp.services.CsvTransactionService;
 import com.bank.csvapp.utility.CsvTransactionTagManager;
 import com.bank.csvapp.utility.FileDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class IndexController {
-
-    private static final String ROOT_URL_STRING = "rootUrl";
-
-    @Value("${server.servlet.path}")
-    private String rootUrl;
 
     @Autowired
     private CsvTransactionService csvTransactionService;
     @Autowired
     private CsvTransactionTagManager csvTransactionTagManager;
 
-    @RequestMapping(value = {"/", ""})
-    public String index(Model model) {
-        model.addAttribute(ROOT_URL_STRING, rootUrl);
-        return "index";
+    @CrossOrigin
+    @GetMapping(value = "/transactionTags", consumes="application/json", produces="application/json")
+    public ResponseEntity<JsonNode> dateRange() throws IOException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        warmUpCacheCuzInMemDb(); //todo: remove this when using a permanent database
+
+        List<CsvTransactionTag> csvTagList = csvTransactionTagManager.getAllCsvTransactionTags();
+
+        String csvTransactionListString = objectMapper.writeValueAsString(csvTagList);
+        JsonNode node = objectMapper.readTree(csvTransactionListString);
+        return new ResponseEntity<>(node, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/seed")
-    public String seedDb(Model model) {
-        model.addAttribute(ROOT_URL_STRING, rootUrl);
+    @CrossOrigin
+    @PostMapping(value = "/dateRange", consumes="application/json", produces="application/json")
+    public ResponseEntity<JsonNode> dateRange(@RequestBody String body) throws IOException {
 
-        FileDto fileDto = new FileDto(csvTransactionTagManager);
-        List<CsvTransaction> transactionList = fileDto.csvFileImport();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode requestBody = objectMapper.readTree(body);
 
-//        DecimalFormat df = new DecimalFormat("#.##");
-//        df.setRoundingMode(RoundingMode.HALF_EVEN);
-//        System.out.println(df.format(transactionList.get(0).getBalance()));
+        warmUpCacheCuzInMemDb(); //todo: remove this when using a permanent database
 
-        csvTransactionService.saveCsvTransactionList(transactionList);
+        //get fields from body
+        Long startDate = requestBody.findValue(CommonConstants.START_DATE).asLong();
+        Long endDate = requestBody.findValue(CommonConstants.END_DATE).asLong();
+        String filterTagArrayString = requestBody.findValue(CommonConstants.FILTER_TAGS).toString();
 
-        //TODO: bootstrap on context change? (HR app way?)
-        //TODO: add front-end for adding new filters
-        //TODO: add ability to apply or remove filters from view output
+        //get list of strings from filterTags json string
+        CollectionType stringType = objectMapper.getTypeFactory().constructCollectionType(List.class, String.class);
+        List<String> filterTags = objectMapper.readValue(filterTagArrayString, stringType);
 
-        //TODO: add types to table
-        //TODO: remove dollar signs from empty columns
-        //TODO: stop continuing debit/credit values when next row is null
+        Date start = new Date(startDate);
+        Date end = new Date(endDate);
 
-        return "seed";
+        Set<CsvTransaction> matchingTransactions;
+
+        if(filterTags.isEmpty()) {
+            matchingTransactions = csvTransactionService.getAllTransactionsInRange(start, end);
+        } else {
+            Set<Integer> csvTagIdSet = filterTags.parallelStream()
+                    .map(x -> CsvTransactionTagManager.csvTransactionTagCache.get(x).getId())
+                    .collect(Collectors.toSet());
+            matchingTransactions = csvTransactionService.getAllTransactionsInRangeAndWithTags(start, end, csvTagIdSet);
+        }
+
+        String csvTransactionListString = objectMapper.writeValueAsString(matchingTransactions);
+        JsonNode node = objectMapper.readTree(csvTransactionListString);
+        return new ResponseEntity<>(node, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/table")
-    public String table(Model model) {
-        model.addAttribute(ROOT_URL_STRING, rootUrl);
-        model.addAttribute("transactionList", csvTransactionService.listAllCsvTransactions());
+    //TODO: bootstrap on context change? (HR app way?)
+    //TODO: add front-end for adding new filters
+    //TODO: add ability to apply or remove filters from view output
 
-        return "table";
+    //TODO: add types to table
+    //TODO: remove dollar signs from empty columns
+    //TODO: stop continuing debit/credit values when next row is null
+
+    private void warmUpCacheCuzInMemDb() {
+        //warm up cache
+        if(CsvTransactionTagManager.csvTransactionTagCache.size() == 0) {
+            FileDto fileDto = new FileDto(csvTransactionTagManager);
+            List<CsvTransaction> transactionList = fileDto.csvFileImport();
+            csvTransactionService.saveCsvTransactionList(transactionList);
+        }
+
+        //update cache with db objects
+        csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
     }
 
-    @RequestMapping(value = "/login")
-    public String login(Model model) {
-        model.addAttribute(ROOT_URL_STRING, rootUrl);
-        return "login";
-    }
 }

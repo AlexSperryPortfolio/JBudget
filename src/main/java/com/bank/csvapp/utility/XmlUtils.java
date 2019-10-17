@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,8 +67,8 @@ final class XmlUtils {
         mainRootElement.appendChild(accountNumberElement);
 
         Element postDateElement = doc.createElement("postDate");
-        java.util.Date originalDate = CsvTransaction.STANDARD_TRANSACTION_DATE_FORMAT.parse(csvRecord.get(CsvTransaction.POST_DATE_STRING));
-        String xmlDateString = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(originalDate.getTime()));
+        Date originalDate = CsvTransaction.STANDARD_TRANSACTION_DATE_FORMAT.parse(csvRecord.get(CsvTransaction.POST_DATE_STRING));
+        String xmlDateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date(originalDate.getTime()));
         postDateElement.appendChild(doc.createTextNode(xmlDateString));
         mainRootElement.appendChild(postDateElement);
 

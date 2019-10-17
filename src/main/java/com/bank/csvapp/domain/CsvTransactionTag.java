@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class CsvTransactionTag {
@@ -16,7 +17,7 @@ public class CsvTransactionTag {
 
     private String matchString;
 
-    public CsvTransactionTag() {
+    public CsvTransactionTag() {//default constructor
     }
 
     public CsvTransactionTag(String typeName) {
@@ -26,6 +27,10 @@ public class CsvTransactionTag {
     public CsvTransactionTag(String typeName, String matchString) {
         this.typeName = typeName;
         this.matchString = matchString;
+    }
+
+    public Integer getId() {
+        return this.id;
     }
 
     public String getTypeName() {
@@ -42,5 +47,19 @@ public class CsvTransactionTag {
 
     public void setMatchString(String matchString) {
         this.matchString = matchString;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CsvTransactionTag that = (CsvTransactionTag) o;
+        return Objects.equals(getTypeName(), that.getTypeName()) &&
+                Objects.equals(getMatchString(), that.getMatchString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTypeName(), getMatchString());
     }
 }

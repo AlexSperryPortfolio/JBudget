@@ -1,8 +1,11 @@
 package com.bank.csvapp.domain;
 
+import com.bank.csvapp.utility.serializers.CsvTransactionSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,14 +14,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Version;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
+@JsonSerialize(contentUsing = CsvTransactionSerializer.class)
 public class CsvTransaction {
 
     public static final SimpleDateFormat STANDARD_TRANSACTION_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
@@ -42,6 +49,8 @@ public class CsvTransaction {
 
     //	Account Number,Post Date,Check,Description,Debit,Credit,Status,Balance
     private String accountNumber;
+    @Basic
+    @Temporal(TemporalType.DATE)
     private Date postDate;
     private String checkColumn;
     private String description;
@@ -141,5 +150,28 @@ public class CsvTransaction {
 
     public void setTagList(List<CsvTransactionTag> typeList) {
         this.tagList = typeList;
+    }
+
+    @Override
+    public String toString() {
+        return this.postDate+" "+this.description+" "+this.debit+" "+this.credit+" "+this.balance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CsvTransaction that = (CsvTransaction) o;
+        return Objects.equals(getAccountNumber(), that.getAccountNumber()) &&
+                Objects.equals(getPostDate(), that.getPostDate()) &&
+                Objects.equals(getDescription(), that.getDescription()) &&
+                Objects.equals(getDebit(), that.getDebit()) &&
+                Objects.equals(getCredit(), that.getCredit()) &&
+                Objects.equals(getBalance(), that.getBalance());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccountNumber(), getPostDate(), getDescription(), getDebit(), getCredit(), getBalance());
     }
 }

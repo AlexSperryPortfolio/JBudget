@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
@@ -14,12 +15,13 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
 	@Autowired
 	private CsvTransactionTagRepository csvTransactionTagRepository;
 	
-	public List<CsvTransactionTag> listAllCsvTransactionTags() {
+	public List<CsvTransactionTag> getAllCsvTransactionTags() {
 		return (List<CsvTransactionTag>) csvTransactionTagRepository.findAll();
 	}
 
     public CsvTransactionTag getCsvTransactionTagById(Integer id) {
-    	return csvTransactionTagRepository.findOne(id);
+		Optional<CsvTransactionTag> csvTransactionTagOptional = csvTransactionTagRepository.findById(id);
+    	return csvTransactionTagOptional.orElse(null);
     }
 
     public CsvTransactionTag saveCsvTransactionTag(CsvTransactionTag csvTransactionTag) {
@@ -27,11 +29,11 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
     }
 
     public List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagIterable) {
-    	return (List<CsvTransactionTag>) csvTransactionTagRepository.save(csvTransactionTagIterable);
+    	return (List<CsvTransactionTag>) csvTransactionTagRepository.saveAll(csvTransactionTagIterable);
     }
 
-    public void deleteCsvTransactionTag(Integer id) {
-    	csvTransactionTagRepository.delete(id);
+    public void deleteCsvTransactionTag(CsvTransactionTag csvTransactionTag) {
+    	csvTransactionTagRepository.delete(csvTransactionTag);
     }
 
 }

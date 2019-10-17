@@ -3,14 +3,26 @@ package com.bank.csvapp.constants;
 public class CommonConstants {
     private CommonConstants(){}
 
-    public static final int INDEX_OF_LAST_ACCOUNT_NUM_QUOTE = 13;
+    //region field constants
+    //common field constants
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
 
-    //tag constants
+    //deserialize field constants
+    public static final String FILTER_TAGS = "filterTags";
+
+    //query field constants
+    public static final String CSV_TAG_IDS = "csvTagIds";
+    //endregion
+
+    //region tag constants
     public static final String ESSENTIALS = "Essentials";
     public static final String SECURITY = "Security";
     public static final String GOALS = "Goals";
     public static final String LIFESTYLE = "Lifestyle";
     public static final String DISCRETIONARY = "Discretionary";
+
+    public static final String YEARLY_EXPENSE = "Yearly Expense";
 
     public static final String STUDENT_LOANS = "Student Loans";
     public static final String BILLS = "Bills";
@@ -24,5 +36,6 @@ public class CommonConstants {
     public static final String GAS_STATION = "Gas Station";
     public static final String GROCERIES = "Groceries";
     public static final String BIG_BOX = "Big Box";
+    //endregion
 
 }

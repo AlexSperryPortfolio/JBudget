@@ -17,7 +17,7 @@ public class CsvTransactionTagManager {
     @Autowired
     private CsvTransactionTagService csvTransactionTagService;
 
-    private static Map<String, CsvTransactionTag> csvTransactionTagCache = new HashMap<>();
+    public static Map<String, CsvTransactionTag> csvTransactionTagCache = new HashMap<>();
 
     public void seedBaseTags() {
         List<CsvTransactionTag> tagList = new ArrayList<>();
@@ -27,6 +27,8 @@ public class CsvTransactionTagManager {
         tagList.add(new CsvTransactionTag(CommonConstants.GOALS));
         tagList.add(new CsvTransactionTag(CommonConstants.LIFESTYLE));
         tagList.add(new CsvTransactionTag(CommonConstants.DISCRETIONARY));
+
+        tagList.add(new CsvTransactionTag(CommonConstants.YEARLY_EXPENSE));
 
         tagList.add(new CsvTransactionTag(CommonConstants.BILLS));
         tagList.add(new CsvTransactionTag(CommonConstants.DEBT));
@@ -72,7 +74,7 @@ public class CsvTransactionTagManager {
         //unemployment
         tagList.add(new CsvTransactionTag("Unemployment"));
 
-        //credits
+        //account credits
         tagList.add(new CsvTransactionTag(CommonConstants.PAYCHECK));
         tagList.add(new CsvTransactionTag("Aston Technologies"));
         tagList.add(new CsvTransactionTag("Backbone Consultants"));
@@ -115,6 +117,7 @@ public class CsvTransactionTagManager {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.DEBT));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.SECURITY));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.STUDENT_LOANS));
             }
         }
 
@@ -148,6 +151,7 @@ public class CsvTransactionTagManager {
                 typeList.add(csvTransactionTagCache.get(entry));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.CAR_REGISTRATION));
                 typeList.add(csvTransactionTagCache.get(CommonConstants.ESSENTIALS));
+                typeList.add(csvTransactionTagCache.get(CommonConstants.YEARLY_EXPENSE));
             }
         }
 
@@ -201,7 +205,9 @@ public class CsvTransactionTagManager {
         //Entertainment
         //Alcohol
         String[] alcoholArray = {"TOTAL WINE", "MGM WINE", "LIQUOR BOY", "PARK LIQUOR STOR", "EDINA LIQUOR", "CUB LI",
-                "BARSTOCK LIQUORS", "THE LITTLE WINE SAINT PAUL", "SHARRETTS LIQUOR", "MA AND PA LIQUOR", "MERWIN LIQUOR"};
+                "BARSTOCK LIQUORS", "THE LITTLE WINE SAINT PAUL", "SHARRETTS LIQUOR", "MA AND PA LIQUOR", "MERWIN LIQUOR",
+                "CUB LI"
+        };
         for (String entry : alcoholArray) {
             if (descUpper.contains(entry)) {
                 typeList.add(csvTransactionTagCache.get(entry));
@@ -283,5 +289,14 @@ public class CsvTransactionTagManager {
                 csvTransactionTagCache.put(csvTransactionTag.getTypeName(), csvTransactionTag);
             }
         }
+    }
+
+    public void resetCsvTransactionTagCacheWithDbTags() {
+        csvTransactionTagCache.clear();
+        warmUpCsvTransactionTagCache(csvTransactionTagService.getAllCsvTransactionTags());
+    }
+
+    public List<CsvTransactionTag> getAllCsvTransactionTags() {
+        return csvTransactionTagService.getAllCsvTransactionTags();
     }
 }
