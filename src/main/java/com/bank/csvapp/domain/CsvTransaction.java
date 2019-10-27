@@ -5,18 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Table(name = "transaction")
 @JsonSerialize(contentUsing = CsvTransactionSerializer.class)
 public class CsvTransaction {
 
@@ -41,26 +31,40 @@ public class CsvTransaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "CsvTransactionId")
+    @Column(name = "Transaction_Id")
     private Integer id;
 
-    @Version
-    private Integer version;
-
-    //	Account Number,Post Date,Check,Description,Debit,Credit,Status,Balance
+    @Column(name = "Account_Number", nullable = false)
     private String accountNumber;
+
     @Basic
     @Temporal(TemporalType.DATE)
+    @Column(name = "Post_Date", nullable = false)
     private Date postDate;
+
+    @Column(name = "Check_Column", nullable = false)
     private String checkColumn;
+
+    @Column(name = "Description", nullable = false)
     private String description;
+
+    @Column(name = "Debit")
     private BigDecimal debit;
+
+    @Column(name = "Credit")
     private BigDecimal credit;
+
+    @Column(name = "Status", nullable = false)
     private String status;
+
+    @Column(name = "Balance", nullable = false)
     private BigDecimal balance;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CsvTransactionTag> tagList;
+
+    public CsvTransaction() {//default constructor
+    }
 
     public CsvTransaction(CSVRecord csvRecord) throws ParseException {
         this.accountNumber = csvRecord.get(ACCOUNT_NUMBER_STRING);
@@ -75,9 +79,6 @@ public class CsvTransaction {
         this.status = csvRecord.get(STATUS_STRING);
         String balanceString = csvRecord.get(BALANCE_STRING);
         this.balance = (StringUtils.isEmpty(balanceString) ? BigDecimal.ZERO : new BigDecimal(balanceString));
-    }
-
-    public CsvTransaction() {
     }
 
     public String getAccountNumber() {

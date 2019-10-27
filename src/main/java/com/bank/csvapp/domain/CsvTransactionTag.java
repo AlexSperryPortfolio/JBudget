@@ -1,20 +1,21 @@
 package com.bank.csvapp.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "transaction_tag")
 public class CsvTransactionTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "Transaction_Tag_Id")
     private Integer id;
 
+    @Column(name = "Name")
     private String typeName;
 
+    @Column(name = "Match_String")
     private String matchString;
 
     public CsvTransactionTag() {//default constructor
