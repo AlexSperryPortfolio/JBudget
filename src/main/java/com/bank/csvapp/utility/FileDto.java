@@ -22,10 +22,6 @@ public class FileDto {
 
     private static final Logger log = Logger.getLogger(FileDto.class);
 
-    //todo: make these env vars
-    private static final String ACCOUNT_HISTORY_CSV_PATH = "C:\\Users\\Admin\\Desktop\\Personal files\\CsvFiles\\AccountHistory.csv";
-    private static final String TRANSACTION_XSD_PATH = "C:\\Users\\Admin\\git\\com.bank.csvapp\\src\\main\\resources\\transaction.xsd";
-
     private final CsvTransactionTagManager csvTransactionTagManager;
 
     public FileDto(CsvTransactionTagManager csvTransactionTagManager) {
@@ -35,8 +31,9 @@ public class FileDto {
     public List<CsvTransaction> csvFileImport() {
         List<CsvTransaction> transactionList = new ArrayList<>();
         List<CSVRecord> csvRecordList = new ArrayList<>();//initialize as empty
+        String accountHistoryPath = ClassLoader.getSystemResource("accountHistory.csv").toString();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(ACCOUNT_HISTORY_CSV_PATH))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(accountHistoryPath))) {
             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(br);
             csvRecordList = csvParser.getRecords();
         } catch (IOException ioEx) {
@@ -45,11 +42,14 @@ public class FileDto {
 
         csvTransactionTagManager.seedBaseTags();
 
+        String xsdPath = ClassLoader.getSystemResource("transaction.xsd").toString();
+
         for (CSVRecord csvRecord : csvRecordList) {
             try {
                 //validate transaction against xsd
                 Document doc = XmlUtils.getTransactionXmlDoc(csvRecord);
-                XmlUtils.validate(new DOMSource(doc), TRANSACTION_XSD_PATH);
+
+                XmlUtils.validate(new DOMSource(doc), xsdPath);
 
                 //if valid (no exceptions thrown) create CsvTransaction and add to list
                 CsvTransaction csvTransaction = new CsvTransaction(csvRecord);

@@ -61,6 +61,11 @@ public class CsvTransaction {
     private BigDecimal balance;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "transaction_transaction_tag",
+            joinColumns = { @JoinColumn(name = "Transaction_Id") },
+            inverseJoinColumns = { @JoinColumn(name = "Transaction_Tag_Id") }
+    )
     private List<CsvTransactionTag> tagList;
 
     public CsvTransaction() {//default constructor

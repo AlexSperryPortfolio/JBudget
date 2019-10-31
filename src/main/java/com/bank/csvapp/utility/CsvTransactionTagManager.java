@@ -3,7 +3,6 @@ package com.bank.csvapp.utility;
 import com.bank.csvapp.constants.CommonConstants;
 import com.bank.csvapp.domain.CsvTransactionTag;
 import com.bank.csvapp.services.CsvTransactionTagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,10 +13,13 @@ import java.util.Map;
 @Service
 public class CsvTransactionTagManager {
 
-    @Autowired
     private CsvTransactionTagService csvTransactionTagService;
 
     public static Map<String, CsvTransactionTag> csvTransactionTagCache = new HashMap<>();
+
+    public CsvTransactionTagManager(CsvTransactionTagService csvTransactionTagService) {
+        this.csvTransactionTagService = csvTransactionTagService;
+    }
 
     public void seedBaseTags() {
         List<CsvTransactionTag> tagList = new ArrayList<>();

@@ -1,11 +1,9 @@
 package com.bank.csvapp.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.bank.csvapp.domain.CsvTransaction;
 import com.bank.csvapp.repositories.CsvTransactionRepository;
 import com.bank.csvapp.services.CsvTransactionService;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -14,9 +12,12 @@ import java.util.Set;
 
 @Service
 public class CsvTransactionServiceImpl implements CsvTransactionService{
-	
-	@Autowired
+
 	private CsvTransactionRepository csvTransactionRepository;
+
+	public CsvTransactionServiceImpl(CsvTransactionRepository csvTransactionRepository) {
+		this.csvTransactionRepository = csvTransactionRepository;
+	}
 
 	@Override
 	public List<CsvTransaction> listAllCsvTransactions() {

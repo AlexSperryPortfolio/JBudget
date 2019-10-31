@@ -1,2 +1,2 @@
-# com.bank.csvapp
-csv app
+# JBudget
+A budgeting app using imported csv files
