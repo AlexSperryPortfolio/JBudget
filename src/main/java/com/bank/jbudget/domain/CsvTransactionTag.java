@@ -1,6 +1,13 @@
 package com.bank.jbudget.domain;
 
-import javax.persistence.*;
+import com.bank.jbudget.constants.CommonConstants;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
@@ -8,14 +15,14 @@ import java.util.Objects;
 public class CsvTransactionTag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "Transaction_Tag_Id")
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = CommonConstants.BIGINT, name = "transaction_tag_id")
+    private Long id;
 
-    @Column(name = "Name")
+    @Column(name = "name")
     private String typeName;
 
-    @Column(name = "Match_String")
+    @Column(name = "match_string")
     private String matchString;
 
     public CsvTransactionTag() {//default constructor
@@ -30,8 +37,12 @@ public class CsvTransactionTag {
         this.matchString = matchString;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTypeName() {

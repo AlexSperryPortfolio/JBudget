@@ -21,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,7 +43,9 @@ public class IndexController {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        warmUpCacheCuzInMemDb(); //TODO: remove this when using a permanent database
+        if(CsvTransactionTagManager.csvTransactionTagCache.size() == 0) {
+            csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
+        }
 
         List<CsvTransactionTag> csvTagList = csvTransactionTagManager.getAllCsvTransactionTags();
 
@@ -53,8 +58,6 @@ public class IndexController {
     @PostMapping(value = "/dateRange", consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JsonNode> dateRange(@RequestBody JsonNode requestBody) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-
-        warmUpCacheCuzInMemDb(); //TODO: remove this when using a permanent database
 
         //get fields from body
         JsonNode startDateNode = requestBody.findValue(CommonConstants.START_DATE);
@@ -79,10 +82,18 @@ public class IndexController {
         if(filterTags.isEmpty()) {
             matchingTransactions = csvTransactionService.getAllTransactionsInRange(startDate, endDate);
         } else {
-            Set<Integer> csvTagIdSet = filterTags.parallelStream()
-                    .map(x -> CsvTransactionTagManager.csvTransactionTagCache.get(x).getId())
+            System.out.println(Arrays.toString(filterTags.toArray())); //todo make this a log
+            Set<Long> csvTagIdSet = filterTags.parallelStream()
+                    .map(x -> CsvTransactionTagManager.csvTransactionTagCache.get(x))
+                    .filter(Objects::nonNull)
+                    .map(CsvTransactionTag::getId)
                     .collect(Collectors.toSet());
-            matchingTransactions = csvTransactionService.getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIdSet);
+            if(!csvTagIdSet.isEmpty()) {
+                matchingTransactions = csvTransactionService.getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIdSet);
+            } else {
+                System.out.println("No tags match"); //todo make this a log
+                matchingTransactions = new HashSet<>();
+            }
         }
 
         String csvTransactionListString = objectMapper.writeValueAsString(matchingTransactions);

@@ -1,22 +1,20 @@
 package com.bank.jbudget.domain;
 
+import com.bank.jbudget.constants.CommonConstants;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.Version;
 import javax.validation.constraints.Size;
 
 public class BudgetPlanCsvTransactionTag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "BudgetPlanCsvTransactionId")
-    private Integer id;
-
-    @Version
-    private Integer version;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = CommonConstants.BIGINT, name = "BudgetPlanCsvTransactionId")
+    private Long id;
 
     @ManyToOne
     private BudgetPlan budgetPlan;
@@ -30,20 +28,12 @@ public class BudgetPlanCsvTransactionTag {
     public BudgetPlanCsvTransactionTag() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
     }
 
     public BudgetPlan getBudgetPlan() {

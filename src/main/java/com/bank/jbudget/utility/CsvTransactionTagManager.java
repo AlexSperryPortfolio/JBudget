@@ -158,7 +158,7 @@ public class CsvTransactionTagManager {
         }
 
         //Gas Station
-        String[] gasStationArray = {"BP", "HOLIDAY STNSTORE", "WINNER", "SUPERAMERICA", "CASEYS"};
+        String[] gasStationArray = {"BP#", "HOLIDAY STNSTORE", "WINNER", "SUPERAMERICA", "CASEYS"};
 
         for (String entry : gasStationArray) {
             if (descUpper.contains(entry)) {

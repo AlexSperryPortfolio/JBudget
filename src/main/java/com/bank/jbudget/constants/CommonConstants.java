@@ -38,4 +38,9 @@ public class CommonConstants {
     public static final String BIG_BOX = "Big Box";
     //endregion
 
+    //region column constants
+    public static final String BIGINT = "BIGINT";
+
+    //endregion
+
 }

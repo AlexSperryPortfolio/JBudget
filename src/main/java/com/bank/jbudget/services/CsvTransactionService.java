@@ -10,15 +10,15 @@ public interface CsvTransactionService {
 	
 	List<CsvTransaction> listAllCsvTransactions();
 
-    CsvTransaction getCsvTransactionById(Integer id);
+    CsvTransaction getCsvTransactionById(Long id);
 
     Set<CsvTransaction> getAllTransactionsInRange(Date startDate, Date endDate);
 
-    Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Integer> csvTransactionIds);
+    Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Long> csvTransactionIds);
 
     CsvTransaction saveCsvTransaction(CsvTransaction csvTransaction);
 
-    List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionIterable);
+    List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionList);
 
     void deleteCsvTransaction(CsvTransaction csvTransaction);
 

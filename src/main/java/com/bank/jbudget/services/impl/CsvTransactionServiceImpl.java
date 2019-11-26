@@ -25,7 +25,7 @@ public class CsvTransactionServiceImpl implements CsvTransactionService{
 	}
 
 	@Override
-	public CsvTransaction getCsvTransactionById(Integer id) {
+	public CsvTransaction getCsvTransactionById(Long id) {
 		Optional<CsvTransaction> csvTransactionOptional = csvTransactionRepository.findById(id);
 		return csvTransactionOptional.orElse(null);
 	}
@@ -34,7 +34,7 @@ public class CsvTransactionServiceImpl implements CsvTransactionService{
 		return csvTransactionRepository.getAllTransactionsInRange(startDate, endDate);
 	}
 
-	public Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Integer> csvTagIds) {
+	public Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Long> csvTagIds) {
 		return csvTransactionRepository.getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIds);
 	}
 
@@ -44,8 +44,8 @@ public class CsvTransactionServiceImpl implements CsvTransactionService{
 	}
 
 	@Override
-	public List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionIterable) {
-		return (List<CsvTransaction>) csvTransactionRepository.saveAll(csvTransactionIterable);
+	public List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionList) {
+		return (List<CsvTransaction>) csvTransactionRepository.saveAll(csvTransactionList);
 	}
 
 	@Override

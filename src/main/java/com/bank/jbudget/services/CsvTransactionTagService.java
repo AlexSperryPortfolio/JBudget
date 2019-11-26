@@ -8,11 +8,11 @@ public interface CsvTransactionTagService {
 	
 	List<CsvTransactionTag> getAllCsvTransactionTags();
 
-    CsvTransactionTag getCsvTransactionTagById(Integer id);
+    CsvTransactionTag getCsvTransactionTagById(Long id);
 
     CsvTransactionTag saveCsvTransactionTag(CsvTransactionTag csvTransactionTag);
 
-    List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagIterable);
+    List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagList);
 
     void deleteCsvTransactionTag(CsvTransactionTag csvTransactionTag);
 

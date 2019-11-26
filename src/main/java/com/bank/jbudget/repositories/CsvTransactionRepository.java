@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Date;
 import java.util.Set;
 
-public interface CsvTransactionRepository extends CrudRepository<CsvTransaction, Integer>{
+public interface CsvTransactionRepository extends CrudRepository<CsvTransaction, Long>{
 
     @Query(Queries.GET_CSV_TRANSACTIONS_BY_DATE_RANGE)
     Set<CsvTransaction> getAllTransactionsInRange(
@@ -21,5 +21,5 @@ public interface CsvTransactionRepository extends CrudRepository<CsvTransaction,
     Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(
             @Param(CommonConstants.START_DATE) Date startDate,
             @Param(CommonConstants.END_DATE) Date endDate,
-            @Param(CommonConstants.CSV_TAG_IDS) Set<Integer> csvTagIds);
+            @Param(CommonConstants.CSV_TAG_IDS) Set<Long> csvTagIds);
 }

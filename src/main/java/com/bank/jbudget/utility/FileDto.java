@@ -1,5 +1,6 @@
 package com.bank.jbudget.utility;
 
+import com.bank.jbudget.JBudget;
 import com.bank.jbudget.domain.CsvTransaction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -12,8 +13,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +34,9 @@ public class FileDto {
     public List<CsvTransaction> csvFileImport() {
         List<CsvTransaction> transactionList = new ArrayList<>();
         List<CSVRecord> csvRecordList = new ArrayList<>();//initialize as empty
-        String accountHistoryPath = ClassLoader.getSystemResource("accountHistory.csv").toString();
+        InputStream accountHistoryStream = JBudget.class.getResourceAsStream("/accountHistory.csv");
 
-        try (BufferedReader br = new BufferedReader(new FileReader(accountHistoryPath))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(accountHistoryStream, StandardCharsets.UTF_8))) {
             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(br);
             csvRecordList = csvParser.getRecords();
         } catch (IOException ioEx) {
@@ -42,7 +45,7 @@ public class FileDto {
 
         csvTransactionTagManager.seedBaseTags();
 
-        String xsdPath = ClassLoader.getSystemResource("transaction.xsd").toString();
+        String xsdPath = JBudget.class.getResource("/transaction.xsd").getPath();
 
         for (CSVRecord csvRecord : csvRecordList) {
             try {

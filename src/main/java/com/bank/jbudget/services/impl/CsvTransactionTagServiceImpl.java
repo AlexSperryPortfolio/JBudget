@@ -19,7 +19,7 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
 		return (List<CsvTransactionTag>) csvTransactionTagRepository.findAll();
 	}
 
-    public CsvTransactionTag getCsvTransactionTagById(Integer id) {
+    public CsvTransactionTag getCsvTransactionTagById(Long id) {
 		Optional<CsvTransactionTag> csvTransactionTagOptional = csvTransactionTagRepository.findById(id);
     	return csvTransactionTagOptional.orElse(null);
     }
@@ -28,8 +28,8 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
     	return csvTransactionTagRepository.save(csvTransactionTag);
     }
 
-    public List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagIterable) {
-    	return (List<CsvTransactionTag>) csvTransactionTagRepository.saveAll(csvTransactionTagIterable);
+    public List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagList) {
+    	return (List<CsvTransactionTag>) csvTransactionTagRepository.saveAll(csvTransactionTagList);
     }
 
     public void deleteCsvTransactionTag(CsvTransactionTag csvTransactionTag) {

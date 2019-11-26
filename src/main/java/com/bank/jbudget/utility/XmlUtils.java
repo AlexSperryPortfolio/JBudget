@@ -61,7 +61,7 @@ final class XmlUtils {
         Element mainRootElement = doc.createElementNS("", "transaction");
         doc.appendChild(mainRootElement);
 
-        // append child elements to root element
+        //region append child elements to root element
         Element accountNumberElement = doc.createElement("accountNumber");
         accountNumberElement.appendChild(doc.createTextNode(csvRecord.get(CsvTransaction.ACCOUNT_NUMBER_STRING)));
         mainRootElement.appendChild(accountNumberElement);
@@ -101,6 +101,7 @@ final class XmlUtils {
             balanceElement.appendChild(doc.createTextNode(csvRecord.get(CsvTransaction.BALANCE_STRING)));
             mainRootElement.appendChild(balanceElement);
         }
+        //endregion
 
         // output DOM XML to console
         Transformer transformer = TransformerFactory.newInstance().newTransformer();

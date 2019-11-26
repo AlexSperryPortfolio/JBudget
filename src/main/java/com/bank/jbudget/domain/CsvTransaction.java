@@ -1,11 +1,25 @@
 package com.bank.jbudget.domain;
 
+import com.bank.jbudget.constants.CommonConstants;
 import com.bank.jbudget.utility.serializers.CsvTransactionSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,41 +44,41 @@ public class CsvTransaction {
     public static final String BALANCE_STRING = "Balance";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "Transaction_Id")
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = CommonConstants.BIGINT, name = "transaction_id")
+    private Long id;
 
-    @Column(name = "Account_Number", nullable = false)
+    @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
     @Basic
     @Temporal(TemporalType.DATE)
-    @Column(name = "Post_Date", nullable = false)
+    @Column(name = "post_date", nullable = false)
     private Date postDate;
 
-    @Column(name = "Check_Column", nullable = false)
+    @Column(name = "check_column", nullable = false)
     private String checkColumn;
 
-    @Column(name = "Description", nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "Debit")
+    @Column(name = "debit")
     private BigDecimal debit;
 
-    @Column(name = "Credit")
+    @Column(name = "credit")
     private BigDecimal credit;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "Balance", nullable = false)
+    @Column(name = "balance", nullable = false)
     private BigDecimal balance;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(
             name = "transaction_transaction_tag",
-            joinColumns = { @JoinColumn(name = "Transaction_Id") },
-            inverseJoinColumns = { @JoinColumn(name = "Transaction_Tag_Id") }
+            joinColumns = { @JoinColumn(name = "transaction_id") },
+            inverseJoinColumns = { @JoinColumn(name = "transaction_tag_id") }
     )
     private List<CsvTransactionTag> tagList;
 
@@ -84,6 +98,14 @@ public class CsvTransaction {
         this.status = csvRecord.get(STATUS_STRING);
         String balanceString = csvRecord.get(BALANCE_STRING);
         this.balance = (StringUtils.isEmpty(balanceString) ? BigDecimal.ZERO : new BigDecimal(balanceString));
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getAccountNumber() {
