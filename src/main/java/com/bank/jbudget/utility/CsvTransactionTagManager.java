@@ -6,9 +6,11 @@ import com.bank.jbudget.services.CsvTransactionTagService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CsvTransactionTagManager {
@@ -293,12 +295,24 @@ public class CsvTransactionTagManager {
         }
     }
 
+    public CsvTransactionTag getTagFromCache(String key) {
+        if(csvTransactionTagCache.size() == 0) { //todo: handle this better
+            System.out.println("Warm up csvTransactionTagCache");
+            resetCsvTransactionTagCacheWithDbTags();
+        }
+        return csvTransactionTagCache.get(key);
+    }
+
     public void resetCsvTransactionTagCacheWithDbTags() {
         csvTransactionTagCache.clear();
         warmUpCsvTransactionTagCache(csvTransactionTagService.getAllCsvTransactionTags());
     }
 
     public List<CsvTransactionTag> getAllCsvTransactionTags() {
-        return csvTransactionTagService.getAllCsvTransactionTags();
+        if(csvTransactionTagCache.size() == 0) { //todo: handle this better
+            System.out.println("Warm up csvTransactionTagCache");
+            resetCsvTransactionTagCacheWithDbTags();
+        }
+        return csvTransactionTagCache.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 }

@@ -23,6 +23,7 @@ import javax.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -178,6 +179,14 @@ public class CsvTransaction {
 
     public void setTagList(List<CsvTransactionTag> typeList) {
         this.tagList = typeList;
+    }
+
+    public void addTag(CsvTransactionTag transactionTag) {
+        this.tagList.add(transactionTag);
+    }
+
+    public void addTags(Collection<CsvTransactionTag> transactionTags) {
+        this.tagList.addAll(transactionTags);
     }
 
     @Override

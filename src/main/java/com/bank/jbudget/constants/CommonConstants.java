@@ -3,6 +3,11 @@ package com.bank.jbudget.constants;
 public class CommonConstants {
     private CommonConstants(){}
 
+    //region pagination constants
+    public static final String PAGE = "page";
+    public static final String SIZE = "size";
+    //endregion
+
     //region field constants
     //common field constants
     public static final String START_DATE = "startDate";
@@ -13,6 +18,7 @@ public class CommonConstants {
 
     //query field constants
     public static final String CSV_TAG_IDS = "csvTagIds";
+    public static final String UNCATEGORIZED_TAG_ID = "uncategorizedTagId";
     //endregion
 
     //region tag constants
