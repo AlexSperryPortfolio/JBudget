@@ -189,6 +189,14 @@ public class CsvTransaction {
         this.tagList.addAll(transactionTags);
     }
 
+    public void removeTag(CsvTransactionTag transactionTag) {
+        this.tagList.remove(transactionTag);
+    }
+
+    public void removeTags(Collection<CsvTransactionTag> transactionTags) {
+        this.tagList.removeAll(transactionTags);
+    }
+
     @Override
     public String toString() {
         return this.postDate+" "+this.description+" "+this.debit+" "+this.credit+" "+this.balance;

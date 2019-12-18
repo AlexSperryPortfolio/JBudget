@@ -6,12 +6,15 @@ public class CommonConstants {
     //region pagination constants
     public static final String PAGE = "page";
     public static final String SIZE = "size";
+    public static final String LIMIT = "limit";
+    public static final String OFFSET = "offset";
     //endregion
 
     //region field constants
     //common field constants
     public static final String START_DATE = "startDate";
     public static final String END_DATE = "endDate";
+    public static final String MESSAGE = "message";
 
     //deserialize field constants
     public static final String FILTER_TAGS = "filterTags";
@@ -42,6 +45,7 @@ public class CommonConstants {
     public static final String GAS_STATION = "Gas Station";
     public static final String GROCERIES = "Groceries";
     public static final String BIG_BOX = "Big Box";
+    public static final String UNCATEGORIZED = "Not Categorized";
     //endregion
 
     //region column constants

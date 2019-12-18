@@ -279,7 +279,7 @@ public class CsvTransactionTagManager {
         }
 
         if (typeList.isEmpty()) {
-            typeList.add(csvTransactionTagCache.get("Not Categorized"));
+            typeList.add(csvTransactionTagCache.get(CommonConstants.UNCATEGORIZED));
         }
 
         return typeList;

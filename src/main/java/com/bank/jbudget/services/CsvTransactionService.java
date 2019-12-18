@@ -1,14 +1,17 @@
 package com.bank.jbudget.services;
 
 import com.bank.jbudget.domain.CsvTransaction;
-import org.springframework.data.domain.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 public interface CsvTransactionService {
-	
+
+    //region crud methods
 	List<CsvTransaction> listAllCsvTransactions();
 
     CsvTransaction getCsvTransactionById(Long id);
@@ -17,11 +20,11 @@ public interface CsvTransactionService {
 
     Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Long> csvTransactionIds);
 
-//    Page<CsvTransaction> getAllUncategorizedTransactionsPaginated(Long uncategorizedTagId, int page, int size);
+    long getUncategorizedTransactionsCount(Long uncategorizedTagId);
 
-    long[] getUncategorizedTransactionIds(Long uncategorizedTagId);
+    long[] getUncategorizedTransactionIdsPaginated(Long uncategorizedTagId, int limit, int offset);
 
-    Set<CsvTransaction> getUncategorizedTransactionsPaginated(long[] uncategorizedTagIds);
+    Set<CsvTransaction> getUncategorizedTransactionsById(long[] uncategorizedTagIds);
 
     CsvTransaction saveCsvTransaction(CsvTransaction csvTransaction);
 
@@ -30,5 +33,14 @@ public interface CsvTransactionService {
     List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionList);
 
     void deleteCsvTransaction(CsvTransaction csvTransaction);
+    //endregion
+
+    //region helper methods
+    JsonNode dateRange(JsonNode requestBody) throws IOException;
+
+    JsonNode getUncategorizedTransactions(int page, int size);
+
+    JsonNode applyTagsToTransactions(JsonNode requestBody) throws JsonProcessingException;
+    //endregion
 
 }
