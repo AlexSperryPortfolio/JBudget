@@ -3,6 +3,7 @@ package com.bank.jbudget.services;
 import com.bank.jbudget.domain.CsvTransaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
@@ -41,6 +42,8 @@ public interface CsvTransactionService {
     JsonNode getUncategorizedTransactions(int page, int size);
 
     JsonNode applyTagsToTransactions(JsonNode requestBody) throws JsonProcessingException;
+
+    JsonNode importCsvFile(MultipartFile accountHistoryFile) throws IOException;
     //endregion
 
 }

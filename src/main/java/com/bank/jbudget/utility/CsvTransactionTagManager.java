@@ -285,6 +285,21 @@ public class CsvTransactionTagManager {
         return typeList;
     }
 
+    public List<CsvTransactionTag> addAllMatchingTagsFromCache(String descriptionContent) {
+        List<CsvTransactionTag> matchingTags = new ArrayList<>();
+        List<CsvTransactionTag> tagsWithMatchers = getAllCsvTransactionTags().parallelStream()
+                .filter(x -> x.getMatchString() != null)
+                .collect(Collectors.toList());
+
+        for(CsvTransactionTag transactionTag : tagsWithMatchers) {
+            if(descriptionContent.toUpperCase().contains(transactionTag.getMatchString())) {
+                matchingTags.add(transactionTag);
+            }
+        }
+
+        return matchingTags;
+    }
+
     private void warmUpCsvTransactionTagCache(List<CsvTransactionTag> csvTransactionTagList) {
         for (CsvTransactionTag csvTransactionTag : csvTransactionTagList) {
             if (csvTransactionTag.getMatchString() != null) {

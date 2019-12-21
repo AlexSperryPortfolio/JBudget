@@ -23,6 +23,7 @@ import javax.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +82,7 @@ public class CsvTransaction {
             joinColumns = { @JoinColumn(name = "transaction_id") },
             inverseJoinColumns = { @JoinColumn(name = "transaction_tag_id") }
     )
-    private List<CsvTransactionTag> tagList;
+    private List<CsvTransactionTag> tagList = new ArrayList<>();
 
     public CsvTransaction() {//default constructor
     }

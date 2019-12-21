@@ -31,10 +31,9 @@ public class FileDto {
         this.csvTransactionTagManager = csvTransactionTagManager;
     }
 
-    public List<CsvTransaction> csvFileImport() {
+    public List<CsvTransaction> csvFileImport(InputStream accountHistoryStream) {
         List<CsvTransaction> transactionList = new ArrayList<>();
         List<CSVRecord> csvRecordList = new ArrayList<>();//initialize as empty
-        InputStream accountHistoryStream = JBudget.class.getResourceAsStream("/accountHistory.csv");
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(accountHistoryStream, StandardCharsets.UTF_8))) {
             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(br);
@@ -42,8 +41,6 @@ public class FileDto {
         } catch (IOException ioEx) {
             log.error(ioEx);
         }
-
-        csvTransactionTagManager.seedBaseTags();
 
         String xsdPath = JBudget.class.getResource("/transaction.xsd").getPath();
 
@@ -56,7 +53,6 @@ public class FileDto {
 
                 //if valid (no exceptions thrown) create CsvTransaction and add to list
                 CsvTransaction csvTransaction = new CsvTransaction(csvRecord);
-                csvTransaction.setTagList(csvTransactionTagManager.addDefaultTags(csvTransaction.getDescription()));
                 transactionList.add(csvTransaction);
 
             } catch (final IOException | ParseException | ParserConfigurationException | TransformerException | SAXException ex) {

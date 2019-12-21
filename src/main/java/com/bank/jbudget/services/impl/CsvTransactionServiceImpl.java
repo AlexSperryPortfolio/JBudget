@@ -1,5 +1,6 @@
 package com.bank.jbudget.services.impl;
 
+import com.bank.jbudget.JBudget;
 import com.bank.jbudget.constants.CommonConstants;
 import com.bank.jbudget.domain.CsvTransaction;
 import com.bank.jbudget.domain.CsvTransactionTag;
@@ -13,8 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,10 +34,14 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 
 	private CsvTransactionRepository csvTransactionRepository;
 	private CsvTransactionTagManager csvTransactionTagManager;
+	private FileDto fileDto;
+	private ObjectMapper objectMapper;
 
 	public CsvTransactionServiceImpl(CsvTransactionRepository csvTransactionRepository, CsvTransactionTagManager csvTransactionTagManager) {
 		this.csvTransactionRepository = csvTransactionRepository;
 		this.csvTransactionTagManager = csvTransactionTagManager;
+		this.fileDto = new FileDto(csvTransactionTagManager);
+		this.objectMapper = new ObjectMapper();
 	}
 
 	//region crud operations
@@ -98,7 +106,6 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 	@Override
 	public JsonNode dateRange(JsonNode requestBody) throws IOException {
 		JsonNode responseNode;
-		ObjectMapper objectMapper = new ObjectMapper();
 
 		//get fields from body
 		JsonNode startDateNode = requestBody.findValue(CommonConstants.START_DATE);
@@ -143,7 +150,6 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 
 	@Override
 	public JsonNode getUncategorizedTransactions(int page, int size) {
-		ObjectMapper objectMapper = new ObjectMapper();
 		Long uncategorizedTagId = csvTransactionTagManager.getTagFromCache(CommonConstants.UNCATEGORIZED).getId();
 
 		long numUncategorizedTransactions = getUncategorizedTransactionsCount(uncategorizedTagId);
@@ -161,7 +167,6 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 	@Override
 	public JsonNode applyTagsToTransactions(JsonNode requestBody) throws JsonProcessingException {
 		long numTransactionsAffected = 0;
-		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectNode responseNode = objectMapper.createObjectNode();
 
 		JsonNode transactionTagsNode = requestBody.findValue("transactionTags");
@@ -186,7 +191,7 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 				//todo: replace below after actually calling db
 				numTransactionsAffected = 1;
 //                csvTransactionService.saveCsvTransaction(transaction);
-			} else if(transactionTags.size() == 1) { //apply one tag to all matching transactions case
+			} else if(transactionTags.size() == 1) { //create one tag and apply to all matching transactions case
 				Set<CsvTransaction> matchingTransactions = getAllMatchingTransactions(transactionTags.get(0).getMatchString());
 				matchingTransactions.parallelStream().forEach(x -> x.addTag(transactionTags.get(0)));
 				matchingTransactions.parallelStream().forEach(x -> x.removeTag(uncategorizedTag));
@@ -195,6 +200,7 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 				numTransactionsAffected = matchingTransactions.size();
 				responseNode.put("createdTag", transactionTags.get(0).getTypeName());
 //                csvTransactionService.saveCsvTransactionList(matchingTransactions.parallelStream().collect(Collectors.toList()));
+//				csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
 			} else {
 				System.out.println("ERROR: only one tag can be used if no transactionId present");
 				responseNode.put(CommonConstants.MESSAGE,"only one tag can be used if no transactionId present");
@@ -209,12 +215,25 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 		return responseNode;
 	}
 
+	@Override
+	public JsonNode importCsvFile(MultipartFile accountHistoryFile) throws IOException {
+		JsonNode responseNode = objectMapper.createObjectNode();
+		InputStream inputStream = new ByteArrayInputStream(accountHistoryFile.getBytes());
+		List<CsvTransaction> transactionList = fileDto.csvFileImport(inputStream);
+		transactionList.parallelStream().forEach(x -> x.addTags(csvTransactionTagManager.addAllMatchingTagsFromCache(x.getDescription())));
+//		saveCsvTransactionList(transactionList);
+
+		return responseNode;
+	}
+
 	//TODO: remove this when using a permanent database
 	public void warmUpCacheCuzInMemDb() {
 		//warm up cache
 		if(CsvTransactionTagManager.csvTransactionTagCache.size() == 0) {
-			FileDto fileDto = new FileDto(csvTransactionTagManager);
-			List<CsvTransaction> transactionList = fileDto.csvFileImport();
+			InputStream accountHistoryStream = JBudget.class.getResourceAsStream("/accountHistory.csv");
+			List<CsvTransaction> transactionList = fileDto.csvFileImport(accountHistoryStream);
+			csvTransactionTagManager.seedBaseTags();
+			transactionList.parallelStream().forEach(x -> x.setTagList(csvTransactionTagManager.addDefaultTags(x.getDescription())));
 			saveCsvTransactionList(transactionList);
 		}
 		//update cache with db objects
