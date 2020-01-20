@@ -20,21 +20,13 @@ public class CsvTransactionTag {
     private Long id;
 
     @Column(name = "name")
-    private String typeName;
-
-    @Column(name = "match_string")
-    private String matchString;
+    private String name;
 
     public CsvTransactionTag() {//default constructor
     }
 
-    public CsvTransactionTag(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public CsvTransactionTag(String typeName, String matchString) {
-        this.typeName = typeName;
-        this.matchString = matchString;
+    public CsvTransactionTag(String name) {
+        this.name = name;
     }
 
     public Long getId() {
@@ -45,20 +37,12 @@ public class CsvTransactionTag {
         this.id = id;
     }
 
-    public String getTypeName() {
-        return this.typeName;
+    public String getName() {
+        return this.name;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public String getMatchString() {
-        return matchString;
-    }
-
-    public void setMatchString(String matchString) {
-        this.matchString = matchString;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -66,12 +50,11 @@ public class CsvTransactionTag {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CsvTransactionTag that = (CsvTransactionTag) o;
-        return Objects.equals(getTypeName(), that.getTypeName()) &&
-                Objects.equals(getMatchString(), that.getMatchString());
+        return Objects.equals(getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getTypeName(), getMatchString());
+        return Objects.hash(getName());
     }
 }

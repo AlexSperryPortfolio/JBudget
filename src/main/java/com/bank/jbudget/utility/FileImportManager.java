@@ -19,47 +19,42 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class FileDto {
+public final class FileImportManager {
 
-    private static final Logger log = Logger.getLogger(FileDto.class);
+    private static final Logger logger = Logger.getLogger(FileImportManager.class);
 
-    private final CsvTransactionTagManager csvTransactionTagManager;
-
-    public FileDto(CsvTransactionTagManager csvTransactionTagManager) {
-        this.csvTransactionTagManager = csvTransactionTagManager;
+    private FileImportManager() {//private default constructor
     }
 
-    public List<CsvTransaction> csvFileImport(InputStream accountHistoryStream) {
-        List<CsvTransaction> transactionList = new ArrayList<>();
-        List<CSVRecord> csvRecordList = new ArrayList<>();//initialize as empty
+    public static Set<CsvTransaction> csvFileImport(InputStream accountHistoryStream) {
+        Set<CsvTransaction> transactions = new HashSet<>();
+        List<CSVRecord> csvRecords = new ArrayList<>();//initialize as empty
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(accountHistoryStream, StandardCharsets.UTF_8))) {
             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(br);
-            csvRecordList = csvParser.getRecords();
+            csvRecords = csvParser.getRecords();
         } catch (IOException ioEx) {
-            log.error(ioEx);
+            logger.error(ioEx);
         }
 
         String xsdPath = JBudget.class.getResource("/transaction.xsd").getPath();
 
-        for (CSVRecord csvRecord : csvRecordList) {
+        for (CSVRecord csvRecord : csvRecords) {
             try {
                 //validate transaction against xsd
                 Document doc = XmlUtils.getTransactionXmlDoc(csvRecord);
-
-                XmlUtils.validate(new DOMSource(doc), xsdPath);
-
-                //if valid (no exceptions thrown) create CsvTransaction and add to list
+                XmlUtils.validate(new DOMSource(doc), xsdPath); //throw exception if invalid against XSD
                 CsvTransaction csvTransaction = new CsvTransaction(csvRecord);
-                transactionList.add(csvTransaction);
-
+                transactions.add(csvTransaction);
             } catch (final IOException | ParseException | ParserConfigurationException | TransformerException | SAXException ex) {
-                log.error(ex);
+                logger.error(ex);
             }
         }
 
-        return transactionList;
+        return transactions;
     }
 }

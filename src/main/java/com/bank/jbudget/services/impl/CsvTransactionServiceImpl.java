@@ -1,18 +1,18 @@
 package com.bank.jbudget.services.impl;
 
-import com.bank.jbudget.JBudget;
 import com.bank.jbudget.constants.CommonConstants;
 import com.bank.jbudget.domain.CsvTransaction;
 import com.bank.jbudget.domain.CsvTransactionTag;
 import com.bank.jbudget.repositories.CsvTransactionRepository;
 import com.bank.jbudget.services.CsvTransactionService;
 import com.bank.jbudget.utility.CsvTransactionTagManager;
-import com.bank.jbudget.utility.FileDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.bank.jbudget.utility.FileImportManager;
+import com.bank.jbudget.utility.TagApplicationManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -28,21 +28,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class CsvTransactionServiceImpl implements CsvTransactionService {
 
+	private static final Logger logger = Logger.getLogger(CsvTransactionServiceImpl.class);
+
 	private CsvTransactionRepository csvTransactionRepository;
 	private CsvTransactionTagManager csvTransactionTagManager;
-	private FileDto fileDto;
-	private ObjectMapper objectMapper;
+	private TagApplicationManager tagApplicationManager;
+	private ObjectMapper objectMapper = new ObjectMapper();
 
-	public CsvTransactionServiceImpl(CsvTransactionRepository csvTransactionRepository, CsvTransactionTagManager csvTransactionTagManager) {
+	public CsvTransactionServiceImpl(CsvTransactionRepository csvTransactionRepository, CsvTransactionTagManager csvTransactionTagManager, TagApplicationManager tagApplicationManager) {
 		this.csvTransactionRepository = csvTransactionRepository;
 		this.csvTransactionTagManager = csvTransactionTagManager;
-		this.fileDto = new FileDto(csvTransactionTagManager);
-		this.objectMapper = new ObjectMapper();
-	}
+		this.tagApplicationManager = tagApplicationManager;
+}
 
 	//region crud operations
 	@Override
@@ -57,28 +59,8 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 	}
 
 	@Override
-	public Set<CsvTransaction> getAllTransactionsInRange(Date startDate, Date endDate) {
-		return csvTransactionRepository.getAllTransactionsInRange(startDate, endDate);
-	}
-
-	@Override
-	public Set<CsvTransaction> getAllTransactionsInRangeAndWithTags(Date startDate, Date endDate, Set<Long> csvTagIds) {
-		return csvTransactionRepository.getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIds);
-	}
-
-	@Override
-	public long getUncategorizedTransactionsCount(Long uncategorizedTagId) {
-		return csvTransactionRepository.getUncategorizedTransactionsCount(uncategorizedTagId);
-	}
-
-	@Override
-	public long[] getUncategorizedTransactionIdsPaginated(Long uncategorizedTagId, int limit, int offset) {
-		return csvTransactionRepository.getUncategorizedTransactionIdsPaginated(uncategorizedTagId, limit, offset);
-	}
-
-	@Override
-	public Set<CsvTransaction> getUncategorizedTransactionsById(long[] uncategorizedTransactionIds) {
-		return csvTransactionRepository.getUncategorizedTransactionsById(uncategorizedTransactionIds);
+	public Set<CsvTransaction> getAllMatchingTransactions(String matchString) {
+		return csvTransactionRepository.getAllMatchingTransactions("%" + matchString + "%");
 	}
 
 	@Override
@@ -87,13 +69,8 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 	}
 
 	@Override
-	public Set<CsvTransaction> getAllMatchingTransactions(String matchString) {
-		return csvTransactionRepository.getAllMatchingTransactions("%" + matchString + "%");
-	}
-
-	@Override
-	public List<CsvTransaction> saveCsvTransactionList(List<CsvTransaction> csvTransactionList) {
-		return (List<CsvTransaction>) csvTransactionRepository.saveAll(csvTransactionList);
+	public Iterable<CsvTransaction> saveCsvTransactions(Collection<CsvTransaction> csvTransactionList) {
+		return csvTransactionRepository.saveAll(csvTransactionList);
 	}
 
 	@Override
@@ -105,7 +82,7 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 	//region helper methods
 	@Override
 	public JsonNode dateRange(JsonNode requestBody) throws IOException {
-		JsonNode responseNode;
+		ObjectNode responseNode;
 
 		//get fields from body
 		JsonNode startDateNode = requestBody.findValue(CommonConstants.START_DATE);
@@ -124,18 +101,17 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 
 			Set<CsvTransaction> matchingTransactions;
 			if (filterTags.isEmpty()) {
-				matchingTransactions = getAllTransactionsInRange(startDate, endDate); //paginate this
+				matchingTransactions = csvTransactionRepository.getAllTransactionsInRange(startDate, endDate); //paginate this
 			} else {
-				System.out.println(Arrays.toString(filterTags.toArray())); //todo make this a log
 				Set<Long> csvTagIdSet = filterTags.parallelStream()
 						.map(x -> csvTransactionTagManager.getTagFromCache(x))
 						.filter(Objects::nonNull)
 						.map(CsvTransactionTag::getId)
 						.collect(Collectors.toSet());
 				if (!csvTagIdSet.isEmpty()) {
-					matchingTransactions = getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIdSet);
+					matchingTransactions = csvTransactionRepository.getAllTransactionsInRangeAndWithTags(startDate, endDate, csvTagIdSet);
 				} else {
-					System.out.println("No tags match"); //todo make this a log
+					logger.info("No tags match");
 					matchingTransactions = new HashSet<>();
 				}
 			}
@@ -143,102 +119,55 @@ public class CsvTransactionServiceImpl implements CsvTransactionService {
 			responseNode = objectMapper.valueToTree(matchingTransactions);
 		} else {
 			responseNode = objectMapper.createObjectNode();
-			((ObjectNode) responseNode).put(CommonConstants.MESSAGE,"ERROR: no startDate and/or endDate");
+			responseNode.put(CommonConstants.MESSAGE,"ERROR: no startDate and/or endDate");
 		}
 		return responseNode;
 	}
 
 	@Override
 	public JsonNode getUncategorizedTransactions(int page, int size) {
+		ObjectNode retNode = objectMapper.createObjectNode();
 		Long uncategorizedTagId = csvTransactionTagManager.getTagFromCache(CommonConstants.UNCATEGORIZED).getId();
 
-		long numUncategorizedTransactions = getUncategorizedTransactionsCount(uncategorizedTagId);
+		long numUncategorizedTransactions = csvTransactionRepository.getUncategorizedTransactionsCount(uncategorizedTagId);
 		long numPages = numUncategorizedTransactions/size + (numUncategorizedTransactions % size == 0 ? 0 : 1);
-		long[] uncategorizedTransactionIds = getUncategorizedTransactionIdsPaginated(uncategorizedTagId, size, size * page);
-		Set<CsvTransaction> uncategorizedTransactions = getUncategorizedTransactionsById(uncategorizedTransactionIds);
+		long[] uncategorizedTransactionIds = csvTransactionRepository.getUncategorizedTransactionIdsPaginated(uncategorizedTagId, size, size * page);
+		if(uncategorizedTransactionIds.length > 0) {
+			Set<CsvTransaction> uncategorizedTransactions = csvTransactionRepository.getUncategorizedTransactionsById(uncategorizedTransactionIds);
 
-		JsonNode uncategorizedTransactionsArray = objectMapper.valueToTree(uncategorizedTransactions);
-		ObjectNode retNode = objectMapper.createObjectNode();
-		retNode.set("uncategorizedTransactions", uncategorizedTransactionsArray);
-		retNode.put("totalPages", numPages);
+			JsonNode uncategorizedTransactionsArray = objectMapper.valueToTree(uncategorizedTransactions);
+			retNode.set("uncategorizedTransactions", uncategorizedTransactionsArray);
+			retNode.put("totalPages", numPages);
+		} else {
+			retNode.put(CommonConstants.MESSAGE, "ERROR: Page number out of Range");
+		}
 		return retNode;
 	}
 
 	@Override
-	public JsonNode applyTagsToTransactions(JsonNode requestBody) throws JsonProcessingException {
-		long numTransactionsAffected = 0;
-		ObjectNode responseNode = objectMapper.createObjectNode();
-
-		JsonNode transactionTagsNode = requestBody.findValue("transactionTags");
-		JsonNode transactionIdsNode = requestBody.findValue("transactionIds");
-
-		CsvTransactionTag[] transactionTagsArray;
-		long[] transactionIds;
-		if(transactionTagsNode != null && transactionIdsNode != null) {
-			transactionTagsArray = objectMapper.treeToValue(transactionTagsNode, CsvTransactionTag[].class);
-			transactionIds = objectMapper.treeToValue(transactionIdsNode, long[].class);
-			final List<CsvTransactionTag> transactionTags = Arrays.stream(transactionTagsArray).collect(Collectors.toList());
-			CsvTransactionTag uncategorizedTag = csvTransactionTagManager.getTagFromCache(CommonConstants.UNCATEGORIZED);
-
-			if(transactionIds.length == 1) { //apply many tags to one uncategorized transaction case
-				transactionTags.clear(); //clear transaction tags and load from cache (apply existing tags don't create a new one case)
-				Arrays.stream(transactionTagsArray).forEach(x -> transactionTags.add(csvTransactionTagManager.getTagFromCache(x.getTypeName())));
-
-				CsvTransaction transaction = getCsvTransactionById(transactionIds[0]);
-				transaction.addTags(transactionTags);
-				transaction.removeTag(uncategorizedTag);
-
-				//todo: replace below after actually calling db
-				numTransactionsAffected = 1;
-//                csvTransactionService.saveCsvTransaction(transaction);
-			} else if(transactionTags.size() == 1) { //create one tag and apply to all matching transactions case
-				Set<CsvTransaction> matchingTransactions = getAllMatchingTransactions(transactionTags.get(0).getMatchString());
-				matchingTransactions.parallelStream().forEach(x -> x.addTag(transactionTags.get(0)));
-				matchingTransactions.parallelStream().forEach(x -> x.removeTag(uncategorizedTag));
-
-				//todo: replace below after actually calling db
-				numTransactionsAffected = matchingTransactions.size();
-				responseNode.put("createdTag", transactionTags.get(0).getTypeName());
-//                csvTransactionService.saveCsvTransactionList(matchingTransactions.parallelStream().collect(Collectors.toList()));
-//				csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
-			} else {
-				System.out.println("ERROR: only one tag can be used if no transactionId present");
-				responseNode.put(CommonConstants.MESSAGE,"only one tag can be used if no transactionId present");
-			}
-		} else { //request body error
-			System.out.println("ERROR: no transactionTags and/or transactionIds");
-			responseNode.put(CommonConstants.MESSAGE,"request body requires transactionTags attribute and transactionTags attribute");
-		}
-
-		//todo: replace this dummy response with meaningful one based on response from db
-		responseNode.put("numTransactionsAffected", numTransactionsAffected);
-		return responseNode;
-	}
-
-	@Override
 	public JsonNode importCsvFile(MultipartFile accountHistoryFile) throws IOException {
-		JsonNode responseNode = objectMapper.createObjectNode();
+		ObjectNode responseNode = objectMapper.createObjectNode();
 		InputStream inputStream = new ByteArrayInputStream(accountHistoryFile.getBytes());
-		List<CsvTransaction> transactionList = fileDto.csvFileImport(inputStream);
-		transactionList.parallelStream().forEach(x -> x.addTags(csvTransactionTagManager.addAllMatchingTagsFromCache(x.getDescription())));
-//		saveCsvTransactionList(transactionList);
+		Set<CsvTransaction> transactions = FileImportManager.csvFileImport(inputStream);
 
+		Set<CsvTransaction> transactionsWithTags = tagApplicationManager.addTagsToTransactionsWithAllMatchers(transactions);
+		Set<CsvTransaction> savedTransactions = StreamSupport.stream(csvTransactionRepository.saveAll(transactionsWithTags).spliterator(), true).collect(Collectors.toSet());
+
+		responseNode.put("numTransactions", savedTransactions.size());
 		return responseNode;
 	}
+	//endregion
 
-	//TODO: remove this when using a permanent database
-	public void warmUpCacheCuzInMemDb() {
-		//warm up cache
-		if(CsvTransactionTagManager.csvTransactionTagCache.size() == 0) {
-			InputStream accountHistoryStream = JBudget.class.getResourceAsStream("/accountHistory.csv");
-			List<CsvTransaction> transactionList = fileDto.csvFileImport(accountHistoryStream);
-			csvTransactionTagManager.seedBaseTags();
-			transactionList.parallelStream().forEach(x -> x.setTagList(csvTransactionTagManager.addDefaultTags(x.getDescription())));
-			saveCsvTransactionList(transactionList);
-		}
-		//update cache with db objects
-		csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
-	}
+//	TODO: remove this when using a permanent database
+//	public List<CsvTransaction> warmUpCacheCuzInMemDb() {
+//		//warm up tag cache
+//		csvTransactionTagManager.resetCsvTransactionTagCacheWithDbTags();
+//		InputStream accountHistoryStream = JBudget.class.getResourceAsStream("/accountHistory.csv");
+//		Set<CsvTransaction> transactions = fileDto.csvFileImport(accountHistoryStream);
+//		Set<CsvTransaction> transactionsWithTags = csvTransactionImportManager.addTagsToTransactionsWithAllMatchers(transactions, csvTransactionTagManager.getTagFromCache(CommonConstants.UNCATEGORIZED));
+//		transactionsWithTagsList = saveCsvTransactionList(transactionsWithTags);
+//		return transactionsWithTagsList;
+//	}
 
 	//endregion
 

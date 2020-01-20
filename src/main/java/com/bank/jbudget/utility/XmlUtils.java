@@ -33,19 +33,21 @@ import java.util.Map;
 
 final class XmlUtils {
 
-    private static final Logger log = Logger.getLogger(XmlUtils.class);
+    private static final Logger logger = Logger.getLogger(XmlUtils.class);
 
     private static Map<String, Validator> validatorMap = new HashMap<>();
 
-    private XmlUtils() {
+    private XmlUtils() {//private default constructor
     }
 
     static void validate(Source xml, String xsdPath) throws SAXException, IOException {
-        //insert xsdPath's Validator into map if not already present
-        if(!validatorMap.containsKey(xsdPath)) {
+        if(!validatorMap.containsKey(xsdPath)) { //insert xsdPath's Validator into map if not already present
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(new File(xsdPath));
-            validatorMap.put(xsdPath, schema.newValidator());
+            Validator validator = schema.newValidator();
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            validatorMap.put(xsdPath, validator);
         }
 
         Validator validator = validatorMap.get(xsdPath);
@@ -54,6 +56,7 @@ final class XmlUtils {
 
     static Document getTransactionXmlDoc(CSVRecord csvRecord) throws TransformerException, ParserConfigurationException, ParseException {
         DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
+        icFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         DocumentBuilder icBuilder;
 
         icBuilder = icFactory.newDocumentBuilder();
@@ -104,13 +107,15 @@ final class XmlUtils {
         //endregion
 
         // output DOM XML to console
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         String output = writer.toString();
 
-        log.debug("Transaction XML:\n" + output);
+        logger.debug("Transaction XML:\n" + output);
 
         return doc;
     }

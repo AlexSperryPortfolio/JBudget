@@ -5,8 +5,10 @@ import com.bank.jbudget.repositories.CsvTransactionTagRepository;
 import com.bank.jbudget.services.CsvTransactionTagService;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
@@ -31,8 +33,8 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
     	return csvTransactionTagRepository.save(csvTransactionTag);
     }
 
-    public List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagList) {
-    	return (List<CsvTransactionTag>) csvTransactionTagRepository.saveAll(csvTransactionTagList);
+    public Iterable<CsvTransactionTag> saveCsvTransactionTags(Collection<CsvTransactionTag> csvTransactionTagList) {
+    	return csvTransactionTagRepository.saveAll(csvTransactionTagList);
     }
 
     public void deleteCsvTransactionTag(CsvTransactionTag csvTransactionTag) {
@@ -41,7 +43,9 @@ public class CsvTransactionTagServiceImpl implements CsvTransactionTagService {
     //endregion
 
 	//region helper methods
-
+	public Set<CsvTransactionTag> getAllTagsByIds(Long[] tagIds) {
+		return csvTransactionTagRepository.getAllTagsByIds(tagIds);
+	}
 	//endregion
 
 }

@@ -32,7 +32,7 @@ public interface CsvTransactionRepository extends CrudRepository<CsvTransaction,
             @Param(CommonConstants.LIMIT) int limit,
             @Param(CommonConstants.OFFSET) int offset);
 
-    @Query(value = Queries.GET_UNCATEGORIZED_TRANSACTIONS_BY_ID)
+    @Query(value = Queries.GET_ALL_UNCATEGORIZED_TRANSACTIONS_USING_UNCATEGORIZED_TRANSACTION_ID)
     Set<CsvTransaction> getUncategorizedTransactionsById(@Param("uncategorizedTransactionIds") long[] uncategorizedTransactionIds);
 
     @Query(Queries.GET_ALL_MATCHING_TRANSACTIONS)

@@ -23,11 +23,11 @@ import javax.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "transaction")
@@ -82,7 +82,7 @@ public class CsvTransaction {
             joinColumns = { @JoinColumn(name = "transaction_id") },
             inverseJoinColumns = { @JoinColumn(name = "transaction_tag_id") }
     )
-    private List<CsvTransactionTag> tagList = new ArrayList<>();
+    private Set<CsvTransactionTag> tags = new HashSet<>();
 
     public CsvTransaction() {//default constructor
     }
@@ -174,28 +174,28 @@ public class CsvTransaction {
         this.balance = balance;
     }
 
-    public List<CsvTransactionTag> getTagList() {
-        return this.tagList;
+    public Set<CsvTransactionTag> getTags() {
+        return this.tags;
     }
 
-    public void setTagList(List<CsvTransactionTag> typeList) {
-        this.tagList = typeList;
+    public void setTags(Set<CsvTransactionTag> tags) {
+        this.tags = tags;
     }
 
-    public void addTag(CsvTransactionTag transactionTag) {
-        this.tagList.add(transactionTag);
+    public void addTag(CsvTransactionTag tag) {
+        this.tags.add(tag);
     }
 
-    public void addTags(Collection<CsvTransactionTag> transactionTags) {
-        this.tagList.addAll(transactionTags);
+    public void addTags(Collection<CsvTransactionTag> tags) {
+        this.tags.addAll(tags);
     }
 
-    public void removeTag(CsvTransactionTag transactionTag) {
-        this.tagList.remove(transactionTag);
+    public void removeTag(CsvTransactionTag tag) {
+        this.tags.remove(tag);
     }
 
-    public void removeTags(Collection<CsvTransactionTag> transactionTags) {
-        this.tagList.removeAll(transactionTags);
+    public void removeTags(Collection<CsvTransactionTag> tags) {
+        this.tags.removeAll(tags);
     }
 
     @Override

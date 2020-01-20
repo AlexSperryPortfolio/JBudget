@@ -2,7 +2,9 @@ package com.bank.jbudget.services;
 
 import com.bank.jbudget.domain.CsvTransactionTag;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface CsvTransactionTagService {
 	
@@ -10,9 +12,11 @@ public interface CsvTransactionTagService {
 
     CsvTransactionTag getCsvTransactionTagById(Long id);
 
+    Set<CsvTransactionTag> getAllTagsByIds(Long[] tagIds);
+
     CsvTransactionTag saveCsvTransactionTag(CsvTransactionTag csvTransactionTag);
 
-    List<CsvTransactionTag> saveCsvTransactionTagList(List<CsvTransactionTag> csvTransactionTagList);
+    Iterable<CsvTransactionTag> saveCsvTransactionTags(Collection<CsvTransactionTag> csvTransactionTagList);
 
     void deleteCsvTransactionTag(CsvTransactionTag csvTransactionTag);
 
