@@ -80,10 +80,9 @@ nb-configuration.xml
 ##############################
 *.csv
 
-
 ##############################
 ## Custom
 ##############################
-/src/main/resources/db/*
-/src/main/java/com/bank/jbudget/utility/TagAndMatcherBootstrapper.java
-/src/main/java/com/bank/jbudget/configuration/InMemBootstrapper.java
+src/main/resources/db/*
+src/main/java/com/bank/jbudget/utility/TagAndMatcherBootstrapper.java
+src/main/java/com/bank/jbudget/configuration/InMemBootstrapper.java
