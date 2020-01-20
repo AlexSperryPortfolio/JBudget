@@ -18,13 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Controller
-public class IndexController {
+public class TransactionController {
 
-    private static final Logger logger = Logger.getLogger(IndexController.class);
+    private static final Logger logger = Logger.getLogger(TransactionController.class);
 
     private CsvTransactionService csvTransactionService;
 
-    public IndexController(CsvTransactionService csvTransactionService) {
+    public TransactionController(CsvTransactionService csvTransactionService) {
         this.csvTransactionService = csvTransactionService;
     }
 
